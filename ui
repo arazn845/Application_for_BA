@@ -1,0 +1,131 @@
+library(shiny)
+library(shinydashboard)
+library(shinyjs)
+library(dplyr)
+library(ggplot2)
+
+# inputs #########################################
+
+Input_csv_file <- fileInput(inputId = "csv_file", label = "upload a csv",multiple = F, accept = c("csv"), placeholder = "waiting for a file")
+
+input_var_sel <- checkboxGroupInput(inputId = "var_sel", label = "Select the variables you want to work with, y should be the first variable", choices = NULL)
+
+input_num <- checkboxGroupInput(inputId = "num", label = "num",choices = NULL)
+
+input_cat <- checkboxGroupInput(inputId = "cat", label = "cat",choices = NULL)
+
+input_y <- selectInput(inputId = "y", label = "y", choices = NULL)
+
+input_prob <- sliderInput(inputId = "prob",label = "",min = 1,max = 100,value = 70,step = 1)
+
+#Header####
+dashHeader <- dashboardHeader(title = "Predictive Business Analytics")
+dashSidebar <- dashboardSidebar(sidebarMenu(
+  menuItem(tabName = "tab_1", text = "Logistic regression"),
+  menuItem(tabName = "tab_2", text = "Artificial Neural Network")
+))
+dashBody <- dashboardBody(
+  tabItems(
+    tabItem(tabName = "tab_1", 
+            # csv ############################################################
+            fluidRow(
+              box(Input_csv_file),
+              box( verbatimTextOutput("csv_file_res") )
+            ),
+            # var sel ###############################################################
+            fluidRow(
+              tabBox(
+                tabPanel(
+                  title = "Variable selection",
+                  input_var_sel,
+                  verbatimTextOutput("faje")
+                ),
+                #  data type ##############################################################
+                tabPanel(
+                  title = "Data type",
+                  fluidRow(
+                    box(width = 4, input_num),
+                    box(width = 4, input_cat),
+                    box(width = 4, input_y)
+                  ),
+                  verbatimTextOutput("theData_3_res")
+                )
+              )
+            ),
+            # partitioning ########################################################
+            fluidRow(
+              box(width = 4, input_prob),
+              box( verbatimTextOutput("prob_res") )
+            ),
+            
+            
+            
+            # model ########################################################################################
+            fluidRow(
+              
+              box(
+                width = 4, height = 300, title = "Coefficients for training set", status = "primary", collapsible = T, solidHeader = T,
+                verbatimTextOutput("glm_training_res")
+              ),
+              box(
+                width = 4, height = 300, title = "Coefficients for test set", status = "primary", collapsible = T, solidHeader = T,
+                verbatimTextOutput("glm_test_res")
+              ),
+            ),
+            # model summary ############################################################
+            
+            fluidRow(
+              box(width = 4, height = 500, title = "Summary for training set", status = "primary", collapsible = T, solidHeader = T,
+                  
+                  verbatimTextOutput("glm_training_summary_res")
+              ),
+              box(width = 4, height = 500, title = "Coefficients for test set", status = "primary", collapsible = T, solidHeader = T,
+                  verbatimTextOutput("glm_test_summary_res")
+              )
+            ),
+            
+            # residual ##################################################################
+            fluidRow(
+              box(
+                width = 4, height = 800, title = "residuals for traing set", status = "primary", collapsible = T, solidHeader = T,
+                DT::dataTableOutput("residuals_for_training")
+              ),
+              box(
+                width = 4, height = 800, title = "residuals for traing set", status = "primary", collapsible = T, solidHeader = T,
+                DT::dataTableOutput("residuals_for_test")
+              ),
+              box(
+                sliderInput(inputId = "cut_off", label = "identify cut off value",min = 0, max = 1,value = 0.5, step = 0.01)
+              )
+            ),
+            
+            # confusion ###################################################################
+            fluidRow(
+              box(
+                width = 4, height = 300, title = "confusoin matrix for traing set", status = "primary", collapsible = T, solidHeader = T,
+                verbatimTextOutput("confusoin_matrix_for_traing_set")
+              ),
+              box(
+                width = 4, height = 300, title = "confusoin matrix for traing set", status = "primary", collapsible = T, solidHeader = T,
+                verbatimTextOutput("confusoin_matrix_for_test_set")
+              ),
+              box(
+                
+              )
+            )
+    ),
+    tabItem(tabName = "tab_2"),
+    tabItem(tabName = "tab_3")
+  )
+)
+
+
+
+
+dashboardPage(
+  header = dashHeader,
+  sidebar = dashSidebar,
+  body = dashBody,
+  title = "Analytics",
+  skin = "red"
+)
